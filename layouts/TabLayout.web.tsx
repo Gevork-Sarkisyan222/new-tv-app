@@ -41,8 +41,7 @@ export default function TabLayout() {
           width: 0,
         },
         headerShown: false,
-      }}
-    >
+      }}>
       <Tabs.Screen
         name="index"
         options={{
@@ -53,9 +52,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="Mqtt"
         options={{
-          title: 'Explore',
+          title: 'MQTT',
           tabBarButton,
           tabBarLabelStyle: textStyles.default,
           tabBarIcon: () => null,

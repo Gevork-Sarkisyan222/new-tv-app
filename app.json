@@ -26,7 +26,8 @@
       "edgeToEdgeEnabled": true,
       "splash": {
         "image": "./assets/images/splash.png"
-      }
+      },
+      "package": "com.gevorkcoder.tvapptvos"
     },
     "ios": {
       "splash": {
