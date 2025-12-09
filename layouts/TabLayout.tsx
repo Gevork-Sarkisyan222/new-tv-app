@@ -1,26 +1,11 @@
-import { NativeTabs, Label, Icon } from 'expo-router/unstable-native-tabs';
+// src/layouts/TabLayout.tsx
+import React from 'react';
 import { Platform } from 'react-native';
+import { NativeTabs, Label, Icon } from 'expo-router/unstable-native-tabs';
 
-import WebTabLayout from './TabLayout.web';
+import TvTabsLayout from './TvTabsLayout';
 
 export default function TabLayout() {
-  if (Platform.OS === 'android' && Platform.isTV) {
-    return <WebTabLayout />;
-  }
-  return (
-    <NativeTabs>
-      <NativeTabs.Trigger name="index">
-        <Label>Home</Label>
-        <Icon sf="house" />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="Mqtt">
-        <Label>Mqtt</Label>
-        <Icon sf="atom" />
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="tv_focus">
-        <Label>TV demo</Label>
-        <Icon sf="tv.fill" />
-      </NativeTabs.Trigger>
-    </NativeTabs>
-  );
+  // На ТВ – свой layout с управлением стрелками
+  return <TvTabsLayout />;
 }

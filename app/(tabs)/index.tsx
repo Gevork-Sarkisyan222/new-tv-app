@@ -23,10 +23,13 @@ const PlayerScreen: React.FC = () => {
   const [videoUri, setVideoUri] = useState<string | null>(null);
 
   // дефолтная картинка, чтобы экран не был пустым
+  // const [imageUri, setImageUri] = useState<string | null>(
+  //   'https://images.pexels.com/photos/4774774/pexels-photo-4774774.jpeg', // null
+  // );
   const [imageUri, setImageUri] = useState<string | null>(
-    'https://images.pexels.com/photos/4774774/pexels-photo-4774774.jpeg', // null
+    null, // null
   );
-  const [isImageMode, setIsImageMode] = useState(true); // false
+  const [isImageMode, setIsImageMode] = useState(false); // false or false lave false
 
   const [nowPlaying, setNowPlaying] = useState<string | null>(null);
   const [playerStatus, setPlayerStatus] = useState<PlayerStatus>('idle');
