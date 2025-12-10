@@ -35,8 +35,7 @@ const TvTabsLayout: React.FC = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Невидимый, но фокусируемый элемент, чтобы стрелки вообще прилетали в JS */}
-      {/* @ts-ignore – эти пропсы есть на ТВ, но TS о них не знает */}
+      {/* @ts-ignore эти пропсы есть на ТВ, но TS о них не знает */}
       <View style={{ width: 1, height: 1, opacity: 0 }} focusable hasTVPreferredFocus />
 
       <Slot />

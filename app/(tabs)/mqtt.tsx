@@ -1,4 +1,3 @@
-// src/screens/MqttScreen.tsx
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -142,7 +141,7 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6', // можно поменять, если нужен другой фон
+    backgroundColor: '#F3F4F6',
   },
   card: {
     width: '100%',

@@ -133,7 +133,7 @@ const PlayerScreen: React.FC = () => {
     }
   };
 
-  // ================= обработчики Video =================
+  // ===обработчики Video =================
 
   const handleVideoLoad = async () => {
     if (playerStatus === 'playing' && videoRef.current) {
@@ -158,23 +158,16 @@ const PlayerScreen: React.FC = () => {
     }
   };
 
-  // ================= UI =================
-
   return (
     <View style={styles.container}>
-      {/* Только медиа, без баров, на полный экран таба */}
       {isImageMode && imageUri ? (
-        <Image
-          source={{ uri: imageUri }}
-          style={styles.media}
-          resizeMode="cover" // картинка на весь экран, возможно с обрезкой
-        />
+        <Image source={{ uri: imageUri }} style={styles.media} resizeMode="cover" />
       ) : (
         <Video
           ref={videoRef}
           style={styles.media}
           source={videoUri ? { uri: videoUri } : undefined}
-          resizeMode="cover" // видео на весь экран, без отступов
+          resizeMode="cover" // видео на весь
           onLoad={handleVideoLoad}
           onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
           isLooping={false}
@@ -189,9 +182,9 @@ export default PlayerScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000', // фон, если вдруг нет ни картинки, ни видео
+    backgroundColor: '#000000',
   },
   media: {
-    ...StyleSheet.absoluteFillObject, // растянуть от края до края
+    ...StyleSheet.absoluteFillObject,
   },
 });

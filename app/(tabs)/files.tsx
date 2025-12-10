@@ -82,7 +82,7 @@ const FilesScreen: React.FC = () => {
 
     // имя файла из URL
     let fileName = trimmed.split('/').pop() || `file_${Date.now()}`;
-    // убираем query-параметры если есть
+
     fileName = fileName.split('?')[0];
 
     const dest = MEDIA_DIR + fileName;
@@ -122,14 +122,12 @@ const FilesScreen: React.FC = () => {
   return (
     <View style={styles.root}>
       <View style={styles.card}>
-        {/* заголовок + описание */}
         <Text style={styles.title}>Media files</Text>
         <Text style={styles.subtitle}>
           Files are stored in the app media directory. You can delete existing files or download new
           ones by URL.
         </Text>
 
-        {/* список занимает всё оставшееся место карточки */}
         <View style={styles.listWrapper}>
           {loading ? (
             <View style={styles.loader}>
@@ -151,7 +149,6 @@ const FilesScreen: React.FC = () => {
           )}
         </View>
 
-        {/* строка с URL внизу карточки */}
         <View style={styles.urlRow}>
           <TextInput
             style={styles.urlInput}
@@ -175,14 +172,12 @@ const FilesScreen: React.FC = () => {
 export default FilesScreen;
 
 const styles = StyleSheet.create({
-  // фон как раньше — светло-серый, без скролла, экран полностью занят
   root: {
     flex: 1,
     backgroundColor: '#E5E7EB',
     paddingHorizontal: 48,
     paddingVertical: 32,
   },
-  // большая белая карточка во весь центр
   card: {
     flex: 1,
     backgroundColor: '#FFFFFF',
@@ -209,7 +204,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
-  // обёртка списка, чтобы он занимал всё пространство между заголовком и инпутом
   listWrapper: {
     flex: 1,
     marginBottom: 16,
