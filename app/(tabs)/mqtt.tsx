@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const STORAGE_KEY = 'mqttConfig';
@@ -12,7 +22,6 @@ const MqttScreen: React.FC = () => {
   const [baseTopic, setBaseTopic] = useState('');
   const [saving, setSaving] = useState(false);
 
-  // подгружаем сохранённый конфиг (если есть)
   useEffect(() => {
     const loadConfig = async () => {
       try {
@@ -48,54 +57,80 @@ const MqttScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.title}>MQTT settings</Text>
-        <Text style={styles.subtitle}>
-          Configure broker connection. These values will be used on app start.
-        </Text>
+    <KeyboardAvoidingView
+      style={styles.root}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          <Text style={styles.title}>MQTT settings</Text>
 
-        <FormField
-          label="Host"
-          value={host}
-          onChangeText={setHost}
-          placeholder="mqtt.example.com"
-        />
-        <FormField
-          label="Port"
-          value={port}
-          onChangeText={setPort}
-          keyboardType="numeric"
-          placeholder="9001"
-        />
-        <FormField
-          label="Username"
-          value={username}
-          onChangeText={setUsername}
-          placeholder="mqtt-user"
-        />
-        <FormField
-          label="Password"
-          value={password}
-          onChangeText={setPassword}
-          placeholder="********"
-          secureTextEntry
-        />
-        <FormField
-          label="Base topic"
-          value={baseTopic}
-          onChangeText={setBaseTopic}
-          placeholder="tv/media"
-        />
+          <View style={styles.form}>
+            {/* Row 1: Host / Port */}
+            <View style={styles.row}>
+              <View style={styles.column}>
+                <FormField
+                  label="Host"
+                  value={host}
+                  onChangeText={setHost}
+                  placeholder="mqtt.example.com"
+                />
+              </View>
+              <View style={styles.column}>
+                <FormField
+                  label="Port"
+                  value={port}
+                  onChangeText={setPort}
+                  keyboardType="numeric"
+                  placeholder="9001"
+                />
+              </View>
+            </View>
 
-        <TouchableOpacity
-          style={[styles.saveButton, saving && { opacity: 0.7 }]}
-          onPress={handleSave}
-          disabled={saving}>
-          <Text style={styles.saveButtonText}>{saving ? 'Saving…' : 'Save config'}</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+            {/* Row 2: Username / Password */}
+            <View style={styles.row}>
+              <View style={styles.column}>
+                <FormField
+                  label="Username"
+                  value={username}
+                  onChangeText={setUsername}
+                  placeholder="mqtt-user"
+                />
+              </View>
+              <View style={styles.column}>
+                <FormField
+                  label="Password"
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="********"
+                  secureTextEntry
+                />
+              </View>
+            </View>
+
+            {/* Row 3: Base topic (только слева, той же ширины, справа пусто) */}
+            <View style={styles.row}>
+              <View style={styles.column}>
+                <FormField
+                  label="Base topic"
+                  value={baseTopic}
+                  onChangeText={setBaseTopic}
+                  placeholder="tv/media"
+                />
+              </View>
+              <View style={styles.column} />
+            </View>
+
+            <TouchableOpacity
+              style={[styles.saveButton, saving && { opacity: 0.7 }]}
+              onPress={handleSave}
+              disabled={saving}>
+              <Text style={styles.saveButtonText}>{saving ? 'Saving…' : 'Save config'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -135,70 +170,66 @@ const FormField: React.FC<FieldProps> = ({
 export default MqttScreen;
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    paddingHorizontal: 80,
-    paddingVertical: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: '#F3F4F6',
-  },
-  card: {
-    width: '100%',
-    maxWidth: 960,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 40,
-    paddingVertical: 24,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    // shadowColor: '#000',
-    // shadowOpacity: 0.08,
-    // shadowRadius: 20,
-    // shadowOffset: { width: 0, height: 8 },
-    elevation: 6,
+    paddingLeft: 24,
+    paddingTop: 20,
+    paddingRight: 40,
+    paddingBottom: 40,
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
   },
   title: {
     fontSize: 22,
     fontWeight: '700',
     color: '#111827',
-    textAlign: 'center',
+    textAlign: 'left',
+    marginBottom: 18,
   },
-  subtitle: {
-    fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
-    marginTop: 4,
-    marginBottom: 20,
+  form: {
+    width: '100%',
   },
-  field: {
+  row: {
+    flexDirection: 'row',
+    columnGap: 16, // расстояние между колонками
     marginBottom: 12,
   },
+  column: {
+    flex: 1, // обе колонки в строке одинаковой ширины
+  },
+  field: {
+    // без flex здесь, иначе Base topic опять растянется
+  },
   fieldLabel: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#4B5563',
     marginBottom: 4,
   },
   input: {
     height: 40,
-    borderRadius: 10,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: '#D1D5DB',
-    backgroundColor: '#F9FAFB',
-    paddingHorizontal: 14,
-    fontSize: 16,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 12,
+    fontSize: 15,
     color: '#111827',
   },
   saveButton: {
-    marginTop: 12,
-    alignSelf: 'center',
-    paddingHorizontal: 32,
+    marginTop: 14,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 24,
     paddingVertical: 10,
     borderRadius: 999,
     backgroundColor: '#2563EB',
   },
   saveButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
   },
 });

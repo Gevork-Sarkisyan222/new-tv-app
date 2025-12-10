@@ -1,7 +1,8 @@
 // src/screens/PlayerScreen.tsx
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Image } from 'react-native';
-import { Video, AVPlaybackStatus } from 'expo-av';
+import { useEventListener } from 'expo';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import * as FileSystem from 'expo-file-system/legacy';
 
 type PlayerStatus = 'idle' | 'playing' | 'paused' | 'stopped';
@@ -18,18 +19,8 @@ const formatUptime = (seconds: number) => {
 };
 
 const PlayerScreen: React.FC = () => {
-  const videoRef = useRef<Video | null>(null);
-
-  const [videoUri, setVideoUri] = useState<string | null>(null);
-
-  // дефолтная картинка, чтобы экран не был пустым
-  // const [imageUri, setImageUri] = useState<string | null>(
-  //   'https://images.pexels.com/photos/4774774/pexels-photo-4774774.jpeg', // null
-  // );
-  const [imageUri, setImageUri] = useState<string | null>(
-    null, // null
-  );
-  const [isImageMode, setIsImageMode] = useState(false); // false or false lave false
+  const [imageUri, setImageUri] = useState<string | null>(null);
+  const [isImageMode, setIsImageMode] = useState(false);
 
   const [nowPlaying, setNowPlaying] = useState<string | null>(null);
   const [playerStatus, setPlayerStatus] = useState<PlayerStatus>('idle');
@@ -37,141 +28,111 @@ const PlayerScreen: React.FC = () => {
   const [lastCommand, setLastCommand] = useState<string>('—');
   const [uptime, setUptime] = useState<number>(0);
 
-  // uptime (может пригодиться для MQTT, даже если не показываем)
   useEffect(() => {
     const timer = setInterval(() => setUptime((t) => t + 1), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  const player = useVideoPlayer(null, (player) => {
+    player.loop = false;
+    player.volume = volume / 100;
+  });
+
+  useEffect(() => {
+    player.volume = volume / 100;
+  }, [player, volume]);
+
+  useEventListener(player, 'playingChange', ({ isPlaying }) => {
+    setPlayerStatus(isPlaying ? 'playing' : 'paused');
+  });
+
+  // слушаем окончание видео
+  useEventListener(player, 'playToEnd', () => {
+    setPlayerStatus('stopped');
+    setNowPlaying(null);
+  });
+
   // ================= МЕТОДЫ ПЛЕЕРА =================
 
-  const playMedia = async (media: string) => {
+  const playMedia = (media: string) => {
     setLastCommand(`play:${media}`);
-    const uri = MEDIA_DIR + media;
 
+    // если это внешний URL — не добавляем MEDIA_DIR
+    const isRemote = media.startsWith('http://') || media.startsWith('https://');
+    const uri = isRemote ? media : MEDIA_DIR + media;
+
+    // если это картинка — показываем её, видео глушим
     if (isImageFile(media)) {
-      // показываем картинку, видео гасим
       setIsImageMode(true);
       setImageUri(uri);
-      setVideoUri(null);
       setNowPlaying(media);
       setPlayerStatus('playing');
 
-      if (videoRef.current) {
-        try {
-          await videoRef.current.stopAsync();
-        } catch (e) {
-          console.warn('stop before image', e);
-        }
-      }
+      player.pause();
+      player.currentTime = 0;
       return;
     }
 
-    // видео поверх, картинку убираем
     setIsImageMode(false);
     setImageUri(null);
-    setVideoUri(uri);
     setNowPlaying(media);
     setPlayerStatus('playing');
+
+    player.replace(uri);
+    player.play();
   };
 
   const pauseVideo = async () => {
     setLastCommand('pause');
-    if (!videoRef.current) return;
-    try {
-      await videoRef.current.pauseAsync();
-      setPlayerStatus('paused');
-    } catch (e) {
-      console.warn('pause error', e);
-    }
+    player.pause();
+    setPlayerStatus('paused');
   };
 
   const stopVideo = async () => {
     setLastCommand('stop');
-    if (videoRef.current) {
-      try {
-        await videoRef.current.stopAsync();
-      } catch (e) {
-        console.warn('stop error', e);
-      }
-    }
+
+    player.pause();
+    player.currentTime = 0;
+
     setPlayerStatus('stopped');
     setNowPlaying(null);
-    setVideoUri(null);
-    setImageUri(null);
     setIsImageMode(false);
+    setImageUri(null);
   };
 
   const setVolumeLevel = async (value: number) => {
-    const clamped = Math.max(0, Math.min(100, value));
+    const clamped = Math.max(0, Math.min(100, Math.round(value)));
     setLastCommand(`volume:${clamped}`);
     setVolumeState(clamped);
-
-    if (videoRef.current) {
-      try {
-        await videoRef.current.setStatusAsync({ volume: clamped / 100 });
-      } catch (e) {
-        console.warn('set volume error', e);
-      }
-    }
+    player.volume = clamped / 100;
   };
 
   const getVolumeLevel = () => volume;
 
   const seekTo = async (seconds: number) => {
     setLastCommand(`seek:${seconds}`);
-    if (!videoRef.current || !videoUri) {
+
+    if (!player || player.duration <= 0) {
       await stopVideo();
       return;
     }
-    try {
-      await videoRef.current.setPositionAsync(seconds * 1000);
-      setPlayerStatus('playing');
-      await videoRef.current.playAsync();
-    } catch (e) {
-      console.warn('seek error', e);
-    }
+
+    player.currentTime = seconds;
+    player.play();
+    setPlayerStatus('playing');
   };
 
-  // ===обработчики Video =================
-
-  const handleVideoLoad = async () => {
-    if (playerStatus === 'playing' && videoRef.current) {
-      try {
-        await videoRef.current.setStatusAsync({ volume: volume / 100 });
-        await videoRef.current.playAsync();
-      } catch (e) {
-        console.warn('play on load', e);
-      }
-    }
-  };
-
-  const handlePlaybackStatusUpdate = (status: AVPlaybackStatus) => {
-    if (!('isLoaded' in status) || !status.isLoaded) return;
-
-    if (status.didJustFinish) {
-      setPlayerStatus('stopped');
-      setNowPlaying(null);
-      setVideoUri(null);
-    } else if (status.isPlaying) {
-      setPlayerStatus('playing');
-    }
-  };
+  // useEffect(() => {
+  //   player.replace('https://www.w3schools.com/html/mov_bbb.mp4');
+  //   player.play();
+  // }, []);
 
   return (
     <View style={styles.container}>
       {isImageMode && imageUri ? (
         <Image source={{ uri: imageUri }} style={styles.media} resizeMode="cover" />
       ) : (
-        <Video
-          ref={videoRef}
-          style={styles.media}
-          source={videoUri ? { uri: videoUri } : undefined}
-          resizeMode="cover" // видео на весь
-          onLoad={handleVideoLoad}
-          onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
-          isLooping={false}
-        />
+        <VideoView player={player} style={styles.media} contentFit="cover" nativeControls={false} />
       )}
     </View>
   );
