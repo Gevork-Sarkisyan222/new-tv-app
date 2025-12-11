@@ -3,11 +3,7 @@ import React, { useCallback, useRef, useEffect } from 'react';
 import { View, Platform, useTVEventHandler } from 'react-native';
 import { Slot, useRouter, usePathname } from 'expo-router';
 
-const ROUTES = [
-  '/(tabs)', // Home
-  '/(tabs)/mqtt', // MQTT
-  '/(tabs)/files', // Files
-];
+const ROUTES = ['/(tabs)', '/(tabs)/mqtt', '/(tabs)/files'];
 
 const TvTabsLayout: React.FC = () => {
   const router = useRouter();
@@ -17,7 +13,6 @@ const TvTabsLayout: React.FC = () => {
   const isSwitchingRef = useRef(false);
   const lastSwitchTimeRef = useRef(0);
 
-  // когда роут меняется (даже не через стрелки) — обновляем индекс
   useEffect(() => {
     const idx = ROUTES.indexOf(pathname as string);
     if (idx !== -1) {
@@ -36,7 +31,6 @@ const TvTabsLayout: React.FC = () => {
 
       const now = Date.now();
 
-      // защита от “удержания” стрелки и спама событиями
       if (isSwitchingRef.current && now - lastSwitchTimeRef.current < 200) {
         return;
       }
@@ -63,8 +57,7 @@ const TvTabsLayout: React.FC = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* невидимый, но фокусируемый элемент, чтобы стрелки приходили в JS */}
-      {/* @ts-ignore: эти пропсы есть только на TV */}
+      {/* @ts-ignore */}
       <View style={{ width: 1, height: 1, opacity: 0 }} focusable hasTVPreferredFocus />
       <Slot />
     </View>

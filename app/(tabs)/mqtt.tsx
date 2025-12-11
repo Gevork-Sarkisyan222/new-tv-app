@@ -9,6 +9,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -49,8 +50,12 @@ const MqttScreen: React.FC = () => {
       setSaving(true);
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(config));
       console.log('MQTT CONFIG SAVED', config);
+
+      Alert.alert('Success ✅', 'Settings saved successfully');
     } catch (e) {
       console.warn('SAVE MQTT CONFIG ERROR', e);
+
+      Alert.alert('Error ❌', 'Error while saving settings');
     } finally {
       setSaving(false);
     }
@@ -66,7 +71,7 @@ const MqttScreen: React.FC = () => {
           <Text style={styles.title}>MQTT settings</Text>
 
           <View style={styles.form}>
-            {/* Row 1: Host / Port */}
+            {/*  Host и Port */}
             <View style={styles.row}>
               <View style={styles.column}>
                 <FormField
@@ -87,7 +92,6 @@ const MqttScreen: React.FC = () => {
               </View>
             </View>
 
-            {/* Row 2: Username / Password */}
             <View style={styles.row}>
               <View style={styles.column}>
                 <FormField
@@ -108,7 +112,6 @@ const MqttScreen: React.FC = () => {
               </View>
             </View>
 
-            {/* Row 3: Base topic (только слева, той же ширины, справа пусто) */}
             <View style={styles.row}>
               <View style={styles.column}>
                 <FormField
@@ -164,11 +167,9 @@ const FormField: React.FC<FieldProps> = ({
         secureTextEntry={secureTextEntry}
         blurOnSubmit
         onSubmitEditing={() => {
-          // жмут "Done"/галочку → закрываем клаву
           Keyboard.dismiss();
         }}
         onBlur={() => {
-          // ушли с поля (стрелкой/фокусом) → закрываем клаву
           Keyboard.dismiss();
         }}
       />
@@ -204,15 +205,13 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    columnGap: 16, // расстояние между колонками
+    columnGap: 16,
     marginBottom: 12,
   },
   column: {
-    flex: 1, // обе колонки в строке одинаковой ширины
+    flex: 1,
   },
-  field: {
-    // без flex здесь, иначе Base topic опять растянется
-  },
+  field: {},
   fieldLabel: {
     fontSize: 13,
     color: '#4B5563',
@@ -240,5 +239,15 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '600',
+  },
+  statusSuccess: {
+    marginTop: 8,
+    fontSize: 13,
+    color: '#059669',
+  },
+  statusError: {
+    marginTop: 8,
+    fontSize: 13,
+    color: '#DC2626',
   },
 });

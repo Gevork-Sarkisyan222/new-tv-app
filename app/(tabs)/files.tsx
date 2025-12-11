@@ -90,7 +90,6 @@ const FilesScreen: React.FC = () => {
 
     setError(null);
 
-    // имя файла из URL
     let fileName = trimmed.split('/').pop() || `file_${Date.now()}`;
     fileName = fileName.split('?')[0];
 
@@ -247,7 +246,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
-  // форма теперь над списком и ближе к верху
   urlRow: {
     flexDirection: 'row',
     alignItems: 'center',
