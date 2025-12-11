@@ -162,6 +162,15 @@ const FormField: React.FC<FieldProps> = ({
         placeholderTextColor="#9CA3AF"
         keyboardType={keyboardType}
         secureTextEntry={secureTextEntry}
+        blurOnSubmit
+        onSubmitEditing={() => {
+          // жмут "Done"/галочку → закрываем клаву
+          Keyboard.dismiss();
+        }}
+        onBlur={() => {
+          // ушли с поля (стрелкой/фокусом) → закрываем клаву
+          Keyboard.dismiss();
+        }}
       />
     </View>
   );
